@@ -7,24 +7,13 @@
     <title>Vue 模板编译</title>
     <!-- 注释 -->
     <script type="text/x-template" id="item-template">
-      <li>
-        <div
-          :class="{bold: isFolder}"
-          class="bold"
-          @click="toggle"
-          @dblclick="changeType">
-          {{model.name}}
-          <span v-if="isFolder">[{{open ? '-' : '+'}}]</span>
-        </div>
-        <ul v-show="open" v-if="isFolder">
-
-          <div v-for="mod in model.children">
-            {{mod}}
-          </div>
-
-          <li class="add" @click="addChild">+</li>
+      <div class="container">
+        <header><strong>想去海边</strong></header>
+        <ul>
+          <li>等一个{{ ziranerran }}的{{ qingtian }}</li>
+          <li>我想要带你去海边</li>
         </ul>
-      </li>
+      </div>
     </script>
 
           <!-- <tree-item
@@ -62,7 +51,8 @@
                     // debug: 增加 trim 操作
                     // 找到了对应的开始标签，解析 attributes
                     // 如果是 v-for 可能产生多个节点，返回的是一个 array
-                    node = parseAttributes(node, tag)
+                    // 先不处理指令
+                    // node = parseAttributes(node, tag)
                     // 完成
                     break
                   } else {
@@ -441,35 +431,8 @@
     const vm = new myVue({
       data() {
         return {
-          model: {
-            name: 'My Tree',
-            children: [
-              { name: 'hello' },
-              { name: 'wat' },
-              {
-                name: 'child folder',
-                children: [
-                  {
-                    name: 'child folder',
-                    children: [
-                      { name: 'hello' },
-                      { name: 'wat' }
-                    ]
-                  },
-                  { name: 'hello' },
-                  { name: 'wat' },
-                  {
-                    name: 'child folder',
-                    children: [
-                      { name: 'hello' },
-                      { name: 'wat' }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-
+          ziranerran: '自然而然',
+          qingtian: '晴天'
         }
       },
       template: '#item-template',
@@ -488,7 +451,7 @@
       font-weight: bold;
     }
     ul {
-      padding-left: 1em;
+      padding-left: 3em;
       line-height: 1.5em;
       list-style-type: dot;
     }
