@@ -101,63 +101,7 @@ function parseAttributes(node, rawTag) {
     const key = attr.split('=')[0]
     const val = attr.split('=')[1]
     node.attributes[key] = val
-
-    switch (key) {
-      case 'v-for2': {   
-        // transformFor()
-        // v-for 节点，就是要根据数据克隆出一样的节点，而且还需要把数据填入
-
-        const nodeList = []
-        const [name, op, arrName] = val.slice(1, -1).split(' ').filter( v => v.trim())
-        const arr = new Function(`with(data) { return ${arrName} }`)()
-
-        function processChild(children, before, after) {
-          for(let i = 0; i < children.length; i += 1) {
-            const child = children[i]
-            if(typeof child === 'string') {
-              if(child.indexOf(before) > -1) {
-                children[i] = child.replace(before, after)
-              }
-            } else {
-              if(child.children) {
-                processChild(child.children, before, after)
-              }
-            }
-          }
-        }
-
-
-        for(const idx in arr) {
-          const replacedNode = JSON.parse(JSON.stringify(node))
-          // 处理可能存在的 mustache 语法
-          if(replacedNode.children) {
-            const children = replacedNode.children
-            for(let i = 0; i < children.length; i += 1) {
-            const child = children[i]
-            if(typeof child === 'string') {
-              if(child.indexOf(name) > -1) {
-                children[i] = child.replace(name, `${arrName}[${idx}]`)
-              }
-            } else {
-              if(child.children) {
-                processChild(child.children, name, `${arrName}[${idx}]`)
-              }
-            }
-          }
-          }
-          nodeList.push(replacedNode)
-        }
-
-        return nodeList
-
-        // 需要把 name 转换为 objName[0] 这样  以及将{{}}里的内容替换
-        break;
-      }
-
-    }
   }
-
-
   return node
 }
 
