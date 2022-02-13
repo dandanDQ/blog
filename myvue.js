@@ -1,8 +1,5 @@
-// 看网上的模板编译方法：词法分析，句法分析
 function genVnode(tmpl) {
-  console.log(tmpl)
   const stack = []
-  // 左标签 <header> 右标签 </header>
   let word = ''
   for(let i = 0; i < tmpl.length; i += 1) {
     const char = tmpl[i]
@@ -23,10 +20,7 @@ function genVnode(tmpl) {
           while(stack.length) {
             const tag = stack.pop()
             if(typeof tag === 'string' && tag.slice(1, -1).split(' ')[0].trim()  === endTag.trim()) {
-              // debug: 增加 trim 操作
               // 找到了对应的开始标签，解析 attributes
-              // 如果是 v-for 可能产生多个节点，返回的是一个 array
-              // 先不处理指令
               node = parseAttributes(node, tag)
               // 完成
               break
@@ -58,7 +52,6 @@ function genVnode(tmpl) {
       word += char
     }
   }
-  console.log(stack)
   return stack[0] // 因为返回的是一个列表。根据 vue 模板只有一个根节点的要求，返回第一个节点即可
 }
 
@@ -81,7 +74,6 @@ function parseAttributes(node, rawTag) {
       } else {
         // 过滤掉空的 attr
         attr.trim() && attributes.push(attr.trim())
-        
         inQuotes = false
         attr = '' // 清空
       }
@@ -90,7 +82,6 @@ function parseAttributes(node, rawTag) {
       if(char === '"') {
         inQuotes = !inQuotes
       }
-      
     }
   }
   // 存入最后一个结果
@@ -105,13 +96,6 @@ function parseAttributes(node, rawTag) {
   return node
 }
 
-function transform(key) {
-  // 转换指令
-  // 也是跟 data 绑定的，数据发生变化，需要相应产生变化
-  // 应该在哪里处理 attributes 呢
-
-}
-
 function matchMustache(w, realDom, track) {
   // 匹配每一对 {{}}，并将其中的字符作为 key，匹配并替换 data 中对应 key 的值
   // /\{\{(.*)\}\}/g 这个不行！
@@ -123,16 +107,12 @@ function matchMustache(w, realDom, track) {
     const key = match.slice(2,-2).trim()
     // 需要收集依赖，当 key 对应的值更新时，调用 diff 算法更新 dom
 
-    // 有个问题，为什么不在数据层面，即data层面去追踪变化&更新渲染，而要在html层级上去做很多繁琐的比较呢
-    // data 如果能跟 dom 直接匹配，会方便很多。也就是需要存下 data -> dom 的哈希表 ？
-
     if(track) {
       realDomTarget = realDom
       wTarget = w
     }
     // 使 mustache 支持表达式，点操作
     function getVal(){
-
       let res = new Function(`with(data) { return ${key}}`)()
       if(typeof res === 'object'){
         res = JSON.stringify(res)
@@ -140,14 +120,11 @@ function matchMustache(w, realDom, track) {
       return res
     }
     const value = getVal()
-
     if(track) {
       // 全局变量归位
       realDomTarget = null
       wTarget = ''
     }
-
-
     word = word.replace(match, value)
   }
   return word
@@ -164,16 +141,13 @@ function createOneNode (vnode, track = true) {
 
   if(tag) {
     const node = document.createElement(tag)
-
     // 将 class 加上
     if(vnode.attributes && vnode.attributes.class) {
       node.classList.add(vnode.attributes.class.slice(1, -1))
     }
     // 将 style 加上
     if(vnode.attributes && vnode.attributes.style) {
-      // 啊啊啊啊啊啊啊啊多了双引号！！！！
       node.style.cssText += vnode.attributes.style.slice(1, -1)
-      // node.style.setAttribute("style", vnode.attributes.style)
     }
 
     // 将 事件监听 加上
@@ -192,9 +166,7 @@ function createOneNode (vnode, track = true) {
   }
 
   const node = document.createTextNode(vnode)
-  // 文本节点，可能涉及到 mustache 转换了
-  // 如果在这里转化 mustache 语法，会不会更好收集依赖
-  
+  // 文本节点，可能涉及到 mustache 转换了;如果在这里转化 mustache 语法，会不会更好收集依赖
   const replaced = matchMustache(vnode, node, track)
   node.nodeValue = replaced
   return node
@@ -222,19 +194,13 @@ function createRealDom(vnode) {
   return realDom
 }
 
-let path = ''
-
 let realDomTarget = null
 let wTarget = ''
 
 function reactiveData(rawData) {
   // 将数据转化为响应式
-
-  // proxy 只支持一层
-
   const handler = {
     get(obj, property, receiver) {
-      // 在这里收集依赖，怎么知道是哪一方调用的呢，所以不在这里收集
       track(property)
       return obj[property]
     },
@@ -270,7 +236,6 @@ function reactiveData(rawData) {
         const deps = Dep[property].slice()
         // Dep[property] = []
         // dom 和 data 是多对多的关系，更新一个，必须更新其他
-
         for(const dep of deps) {
           const oldNode = dep.realDom
           const newNode = createOneNode(dep.w, false) // 这里就不收集依赖了
@@ -278,18 +243,12 @@ function reactiveData(rawData) {
           // 更新nodevalue
           oldNode.nodeValue = newNode.nodeValue
           // oldNode.parentNode.replaceChild(newNode, oldNode)
-
           // more：如果依赖被删除，需要移除对应的节点
         }
       }
   }
 
-
-
-
-
   const data = new Proxy(rawData, handler)
-
   function deepProxy(data) {
     for(const key in data) {
       const val = data[key]
@@ -325,7 +284,7 @@ function myVue(options) {
   methods = options.methods
   this.data = data
   // 获取模板，编译为虚拟 dom
-  
+
   const tmpl = options.template[0] === '#' ?  document.querySelector(options.template).innerHTML : options.template
   const vnode = genVnode(tmpl) // 要把这些文本数据，转化并创建为真实的dom树，append到应用根节点上
   // 使用虚拟dom创建真实dom树
