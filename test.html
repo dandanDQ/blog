@@ -9,14 +9,23 @@
     <script type="text/x-template" id="template">
       <div class="container" style="margin: 10px;">
         <div>count: {{count}}</div>
-        <button @click="add" style="margin: 10px 10px 10px 0">add</button>
-        <button @click="reduce" style="margin: 10px 10px 10px 0">reduce</button>
-        <div>{{num1}}x{{num2}}={{num1*num2}}</div>
-        <button @click="addNum1" style="margin: 10px 10px 10px 0">addNum1</button>
-        <button @click="reduceNum1" style="margin: 10px 10px 10px 0">reduceNum1</button>
-        <button @click="addNum2" style="margin: 10px 10px 10px 0">addNum2</button>
-        <button @click="reduceNum2" style="margin: 10px 10px 10px 0">reduceNum2</button>
-        <div>sum: {{num1+num2}}</div>
+        <div class="btns">
+          <button @click="add">add</button>
+          <button @click="reduce">reduce</button>
+        </div>
+        <div style="border: 1px dashed black"></div>
+        <div class="btns">
+          <span>num1: {{num1}}</span>
+          <button @click="addNum1">add</button>
+          <button @click="reduceNum1">reduce</button>
+        </div>
+        <div class="btns">
+          <span>num2: {{num2}}</span>
+          <button @click="addNum2">add</button>
+          <button @click="reduceNum2">reduce</button>
+        </div>
+        <div>num1 x num2 = {{num1*num2}}</div>
+        <div>num1 + num2 = {{num1+num2}}</div>
       </div>
     </script>
     <script src="./myvue.js">
@@ -59,20 +68,8 @@
     })
   </script>
   <style>
-    body {
-      font-family: Menlo, Consolas, monospace;
-      color: #444;
-    }
-    .item {
-      cursor: pointer;
-    }
-    .bold {
-      font-weight: bold;
-    }
-    ul {
-      padding-left: 3em;
-      line-height: 1.5em;
-      list-style-type: dot;
+    .btns > * {
+      margin: 10px 10px 10px 0
     }
   </style>
 </html>
