@@ -8,12 +8,6 @@
     <!-- 注释 -->
     <script type="text/x-template" id="template">
       <div class="container" style="margin: 10px;">
-        <div>count: {{count}}</div>
-        <div class="btns">
-          <button @click="add">add</button>
-          <button @click="reduce">reduce</button>
-        </div>
-        <div style="border: 1px dashed black"></div>
         <div class="btns">
           <span>num1: {{num1}}</span>
           <button @click="addNum1">add</button>
@@ -38,7 +32,6 @@
     const vm = new myVue({
       data() {
         return {
-          count: 1,
           num1: 1,
           num2: 2,
         }
@@ -46,12 +39,6 @@
       template: '#template',
       el: '#app',
       methods: {
-        add() {
-          this.count += 1
-        },
-        reduce() {
-          this.count -= 1
-        },
         addNum1() {
           this.num1 += 1
         },
