@@ -223,8 +223,9 @@ function reactiveData(rawData) {
 
 function track(property) {
   if(typeof property === 'string' && realDomTarget) {
-      if(!Dep[property]) {
-        Dep[property] = new Set()
+      let set = Dep.get(property)
+      if(!set) {
+        Dep.set(property, set = new Set())
       }
       // 使用 map 减少重复操作
       let target = domTargetMap.get(realDomTarget)
@@ -233,14 +234,13 @@ function track(property) {
         domTargetMap.set(realDomTarget, target)
       }
       // 而且是没存储过的依赖
-      Dep[property].add(target)
+      set.add(target)
   }
 }
 
 function notify(property) {
-  if(Dep[property]) {
-      const deps = Dep[property]
-      // Dep[property] = []
+  if(Dep.has(property)) {
+      const deps = Dep.get(property)
       for(const dep of deps) {
         const realDom = dep.realDom
         const replaced = matchMustache(dep.w)
@@ -252,7 +252,7 @@ function notify(property) {
 
 let data = undefined
 let methods = undefined
-const Dep = {} // 用于存放依赖的对象
+const Dep = new Map() // 用于存放依赖的对象
 const domTargetMap = new Map()
 
 function myVue(options) { 
