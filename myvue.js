@@ -224,7 +224,7 @@ function reactiveData(rawData) {
 function track(property) {
   if(typeof property === 'string' && realDomTarget) {
       if(!Dep[property]) {
-        Dep[property] = []
+        Dep[property] = new Set()
       }
       // 使用 map 减少重复操作
       let target = domTargetMap.get(realDomTarget)
@@ -233,15 +233,13 @@ function track(property) {
         domTargetMap.set(realDomTarget, target)
       }
       // 而且是没存储过的依赖
-      if(Dep[property].indexOf(target) === -1) {
-        Dep[property].push(target)
-      }
+      Dep[property].add(target)
   }
 }
 
 function notify(property) {
   if(Dep[property]) {
-      const deps = Dep[property].slice()
+      const deps = Dep[property]
       // Dep[property] = []
       for(const dep of deps) {
         const realDom = dep.realDom
