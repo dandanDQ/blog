@@ -16,9 +16,11 @@
           <span>num2: {{num2}}</span>
           <button @click="addNum2">add</button>
           <button @click="reduceNum2">reduce</button>
+          <button @click="addNum3">addNum3</button>
         </div>
         <div>{{ num1}}x {{ num2 }}= {{num1*num2}}</div>
         <div>{{ num1 }}+ {{ num2 }} = {{num1+num2}}</div>
+        <div>{{num3.value}}</div>
       </div>
     </script>
     <script src="./myvue.js">
@@ -33,6 +35,10 @@
         return {
           num1: 1,
           num2: 2,
+          num3: {
+            type: 'number',
+            value: 10086
+          }
         }
       },
       template: '#template',
@@ -49,6 +55,9 @@
         },
         reduceNum2() {
           this.num2 -= 1
+        },
+        addNum3() {
+          this.num3.value += 1
         }
       }
     })

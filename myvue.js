@@ -151,19 +151,8 @@ function createOneNode (vnode) {
 
   const node = document.createTextNode(vnode)
   // 文本节点，可能涉及到 mustache 转换了;如果在这里转化 mustache 语法，会不会更好收集依赖
-  
-  // realDomTarget = node
-  // wTarget = vnode
 
-  
-
-  // const replaced = matchMustache(vnode)
-  // node.nodeValue = replaced
-
-  // // 全局变量归位
-  // realDomTarget = null
-  // wTarget = ''
-
+  // 就是将会读取变量的函数（会产生副作用的函数）包装一下
   effect(() => {
     const replaced = matchMustache(vnode)
     node.nodeValue = replaced
@@ -172,15 +161,12 @@ function createOneNode (vnode) {
   return node
 }
 
-function effect(fn, {node, vnode}) {
-  realDomTarget = node
-  wTarget = vnode
+let activeEffect = '' // 感觉是个闭包
 
+function effect(fn) {
+  activeEffect = fn
   fn()
-
-  // 全局变量归位
-  realDomTarget = null
-  wTarget = ''
+  activeEffect = ''
 }
 
 
@@ -210,20 +196,18 @@ function matchMustache(w) {
   return word
 }
 
-let realDomTarget = null
-let wTarget = ''
 
 function reactiveData(rawData) {
   // 递归地将数据转化为响应式
   const handler = {
     get(obj, property) {
-      track(property)
+      track(obj, property)
       return obj[property]
     },
     set(obj, property, value) {
       // 通知之前收集的所有依赖：更新一下相关的值啦！
       obj[property] = value
-      trigger(property)
+      trigger(obj, property)
       return true
     }
   }
@@ -241,38 +225,38 @@ function reactiveData(rawData) {
   return deepProxy(rawData)
 }
 
-function track(property) {
-  if(typeof property === 'string' && realDomTarget) {
-      let set = Dep.get(property)
-      if(!set) {
-        Dep.set(property, set = new Set())
-      }
-      // 使用 map 减少重复操作
-      let target = domTargetMap.get(realDomTarget)
-      if(!target) {
-        target = { w: wTarget,realDom: realDomTarget }
-        domTargetMap.set(realDomTarget, target)
-      }
-      // 而且是没存储过的依赖
-      set.add(target)
+function track(obj, property) {
+  if(typeof property === 'string' && activeEffect) {
+    // 为什么是跟 obj 关联的呢
+    // 这样就解决了点操作符的问题！
+    let depsMap = bucket.get(obj)
+    if(!depsMap) {
+      bucket.set(obj, (depsMap = new Map()))
+    }
+
+    let depsSet = depsMap.get(property)
+    if(!depsSet) {
+      depsMap.set(property, (depsSet = new Set()))
+    }
+
+    // 和这个对象的这个 property 有关系的 fn 就被添加到依赖中了
+    depsSet.add(activeEffect)
+
   }
 }
 
-function trigger(property) {
-  if(Dep.has(property)) {
-      const deps = Dep.get(property)
-      for(const dep of deps) {
-        const realDom = dep.realDom
-        const replaced = matchMustache(dep.w)
-        // 更新nodevalue
-        realDom.nodeValue = replaced
-      }
-    }
+function trigger(obj, property) {
+  const depsMap = bucket.get(obj)
+  if(depsMap) {
+    // 这个对象有被追踪过
+    const depsSet = depsMap.get(property)
+    depsSet.forEach(fn => fn()) // 执行其中的函数
+  }
 }
 
 let data = undefined
 let methods = undefined
-const Dep = new Map() // 用于存放依赖的对象
+const bucket = new Map() // 用于存放依赖的对象
 const domTargetMap = new Map()
 
 function myVue(options) { 
