@@ -152,18 +152,38 @@ function createOneNode (vnode) {
   const node = document.createTextNode(vnode)
   // 文本节点，可能涉及到 mustache 转换了;如果在这里转化 mustache 语法，会不会更好收集依赖
   
+  // realDomTarget = node
+  // wTarget = vnode
+
+  
+
+  // const replaced = matchMustache(vnode)
+  // node.nodeValue = replaced
+
+  // // 全局变量归位
+  // realDomTarget = null
+  // wTarget = ''
+
+  effect(() => {
+    const replaced = matchMustache(vnode)
+    node.nodeValue = replaced
+  }, {node, vnode})
+  
+  return node
+}
+
+function effect(fn, {node, vnode}) {
   realDomTarget = node
   wTarget = vnode
 
-  const replaced = matchMustache(vnode)
-  node.nodeValue = replaced
+  fn()
 
   // 全局变量归位
   realDomTarget = null
   wTarget = ''
-  
-  return node
 }
+
+
 
 function matchMustache(w) {
   // 匹配每一对 {{}}，并将其中的字符作为 key，匹配并替换 data 中对应 key 的值
@@ -203,7 +223,7 @@ function reactiveData(rawData) {
     set(obj, property, value) {
       // 通知之前收集的所有依赖：更新一下相关的值啦！
       obj[property] = value
-      notify(property)
+      trigger(property)
       return true
     }
   }
@@ -238,7 +258,7 @@ function track(property) {
   }
 }
 
-function notify(property) {
+function trigger(property) {
   if(Dep.has(property)) {
       const deps = Dep.get(property)
       for(const dep of deps) {
