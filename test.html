@@ -1,70 +1,76 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Vue 模板编译</title>
     <script type="text/x-template" id="template">
-      <div class="container" style="margin: 10px;">
-        <div class="btns">
-          <span>num1: {{num1}}</span>
-          <button @click="addNum1">add</button>
-          <button @click="reduceNum1">reduce</button>
+        <div class="container" style="margin: 10px;">
+            <div class="btns">
+                <span>num1: {{num1}}</span>
+                <button @click="addNum1">add</button>
+                <button @click="reduceNum1">reduce</button>
+            </div>
+            <div class="btns">
+                <span>num2: {{num2}}</span>
+                <button @click="addNum2">add</button>
+                <button @click="reduceNum2">reduce</button>
+                <button @click="addNum3">addNum3</button>
+            </div>
+            <div>{{ num1}}x {{ num2 }}= {{num1*num2}}</div>
+            <div>{{ num1 }}+ {{ num2 }} = {{num1+num2}}</div>
+            <div>{{num3.value}}</div>
+            <div>{{ok ? text : '不ok哈哈哈'}}</div>
         </div>
-        <div class="btns">
-          <span>num2: {{num2}}</span>
-          <button @click="addNum2">add</button>
-          <button @click="reduceNum2">reduce</button>
-          <button @click="addNum3">addNum3</button>
-        </div>
-        <div>{{ num1}}x {{ num2 }}= {{num1*num2}}</div>
-        <div>{{ num1 }}+ {{ num2 }} = {{num1+num2}}</div>
-        <div>{{num3.value}}</div>
-      </div>
     </script>
     <script src="./myvue.js">
     </script>
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="app"></div>
-  </body>
-  <script>
+</body>
+<script>
     const vm = new myVue({
-      data() {
-        return {
-          num1: 1,
-          num2: 2,
-          num3: {
-            type: 'number',
-            value: 10086
-          }
+        data() {
+            return {
+                num1: 1,
+                num2: 2,
+                num3: {
+                    type: 'number',
+                    value: 10086
+                },
+                ok: true,
+                text: '如果ok就会访问我'
+            }
+        },
+        template: '#template',
+        el: '#app',
+        methods: {
+            addNum1() {
+                this.num1 += 1
+            },
+            reduceNum1() {
+                this.num1 -= 1
+            },
+            addNum2() {
+                this.num2 += 1
+            },
+            reduceNum2() {
+                this.num2 -= 1
+            },
+            addNum3() {
+                this.num3.value += 1
+            }
         }
-      },
-      template: '#template',
-      el: '#app',
-      methods: {
-        addNum1() {
-          this.num1 += 1
-        },
-        reduceNum1() {
-          this.num1 -= 1
-        },
-        addNum2() {
-          this.num2 += 1
-        },
-        reduceNum2() {
-          this.num2 -= 1
-        },
-        addNum3() {
-          this.num3.value += 1
-        }
-      }
     })
-  </script>
-  <style>
-    .btns > * {
-      margin: 10px 10px 10px 0
+</script>
+<style>
+    .btns>* {
+        margin: 10px 10px 10px 0
     }
-  </style>
+</style>
+
 </html>
