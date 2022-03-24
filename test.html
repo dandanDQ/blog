@@ -8,23 +8,35 @@
     <title>Vue 模板编译</title>
     <script type="text/x-template" id="template">
         <div class="container" style="margin: 10px;">
-            <div class="btns">
-                <span>num1: {{num1}}</span>
-                <button @click="addNum1">add</button>
-                <button @click="reduceNum1">reduce</button>
+          <div class="clock">
+            <div class="date">
+              {{config.date.year}}/{{config.date.month}}/{{config.date.date}}
             </div>
-            <div class="btns">
-                <span>num2: {{num2}}</span>
-                <button @click="addNum2">add</button>
-                <button @click="reduceNum2">reduce</button>
-                <button @click="addNum3">addNum3</button>
+            <div class="time">
+              {{config.time.hour}}:{{config.time.minute}}:{{config.time.second}}
             </div>
-            <div>{{ num1}}x {{ num2 }}= {{num1*num2}}</div>
-            <div>{{ num1 }}+ {{ num2 }} = {{num1+num2}}</div>
-            <div>{{num3.value}}</div>
-            <div>{{ok ? text : '不ok哈哈哈'}}</div>
+           
+          </div>         
+          <div> {{config.time.second % 10 === 0 ? text : '非特殊时间'}} </div> 
         </div>
     </script>
+
+    <script type="text/x-template" id="clock">
+      <div class="container" style="margin: 10px;">
+        <div class="clock">
+          <div class="date">
+            {{config.date.year}}/{{config.date.month}}/{{config.date.date}}
+          </div>
+          <div class="time">
+            {{config.time.hour}}:{{config.time.minute}}:{{config.time.second}}
+          </div>
+         
+        </div>         
+        <div> {{config.time.second % 10 === 0 ? text : '非特殊时间'}} </div> 
+      </div>
+  </script>
+    
+    
     <script src="./myvue.js">
     </script>
 </head>
@@ -43,10 +55,23 @@
                     value: 10086
                 },
                 ok: true,
-                text: '如果ok就会访问我'
+                text: '',
+                // 时钟模板
+                config: {
+                  date: {
+                    year: '-',
+                    month: '-',
+                    date: '-'
+                  },
+                  time: {
+                    hour: '-',
+                    minute: '-',
+                    second: '-'
+                  }
+                }
             }
         },
-        template: '#template',
+        template: '#clock',
         el: '#app',
         methods: {
             addNum1() {
@@ -63,14 +88,40 @@
             },
             addNum3() {
                 this.num3.value += 1
-            }
+            },
+        },
+        mounted() {
+          const updateTime = () => {
+              const date = new Date();
+                this.config.date.year = date.getFullYear()
+                this.config.date.month = date.getMonth() + 1
+                this.config.date.date = date.getDate()
+
+                this.config.time.hour = date.getHours()
+                this.config.time.minute = date.getMinutes()
+                this.config.time.second = date.getSeconds().toString().padStart(2, '0')
+                this.text = '整秒报时 ' + date
+              }
+              updateTime()
+              setInterval(updateTime, 1000)
         }
+
     })
 </script>
 <style>
-    .btns>* {
-        margin: 10px 10px 10px 0
-    }
+.clock {
+  height: 120px;
+  background-color: rgb(38, 125, 206);
+  padding: 20px;
+  margin: 40px 10px;
+  border-radius: 6px;
+  display: flex;
+  font-size: 100px;
+  align-items: center;
+  justify-content: space-around;
+  font-weight: 600;
+  color:rgb(255, 255, 255)
+}
 </style>
 
 </html>

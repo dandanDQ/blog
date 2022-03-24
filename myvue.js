@@ -156,13 +156,10 @@ function createOneNode(vnode) {
     effect(() => {
         const replaced = matchMustache(vnode)
         node.nodeValue = replaced
-    }, { node, vnode })
+    })
 
     return node
 }
-
-
-
 
 function matchMustache(w) {
     // 匹配每一对 {{}}，并将其中的字符作为 key，匹配并替换 data 中对应 key 的值
@@ -189,7 +186,7 @@ function matchMustache(w) {
     return word
 }
 
-
+// 响应式原理
 function reactiveData(rawData) {
     // 递归地将数据转化为响应式
     const handler = {
@@ -218,7 +215,6 @@ function reactiveData(rawData) {
     return deepProxy(rawData)
 }
 
-
 let activeEffect = '' // 感觉是个闭包
 
 function cleanup(effectFn) {
@@ -234,11 +230,11 @@ function effect(fn) {
     // 不理解
     const effectFn = ()=> {
         cleanup(effectFn)
-        // 新建一个函数effectFn，big初始化属性deps，用来存储所有包含当前副作用函数的依赖的集合
+        // 新建一个函数effectFn，并初始化属性deps，用来存储所有包含当前副作用函数的依赖的集合
         activeEffect = effectFn
         fn()
 
-        console.log(activeEffect.deps)
+        // console.log(activeEffect.deps)
          // 需不需要这一句呢？
         // 好像可以不用清空？有依赖，则一定能刷新 activeEffect 函数，没有依赖，则不会触发get函数
         activeEffect = ''
@@ -247,7 +243,6 @@ function effect(fn) {
     effectFn.deps = []
     effectFn()
 }
-
 
 function track(obj, property) {
     if (typeof property === 'string' && activeEffect) {
@@ -266,7 +261,6 @@ function track(obj, property) {
         // 和这个对象的这个 property 有关系的 fn 就被添加到依赖中了
         depsSet.add(activeEffect)
         activeEffect.deps.push(depsSet)
-
     }
 }
 
@@ -304,4 +298,9 @@ function myVue(options) {
     // 将 fragment 挂载到 app 节点上
     const app = document.querySelector(options.el || '#app')
     app.appendChild(fragment)
+    // 调用 mounted 钩子
+    if(typeof options.mounted === 'function') {
+      options.mounted.apply(data)
+    }
+    
 }
