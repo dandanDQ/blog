@@ -218,6 +218,7 @@ function reactiveData(rawData) {
 let activeEffect = '' // 感觉是个闭包
 
 function cleanup(effectFn) {
+    // console.log('2')
     for(const deps of effectFn.deps) {
         // 将自己移除
         deps.delete(effectFn)
@@ -229,21 +230,20 @@ function cleanup(effectFn) {
 function effect(fn) {
     // 不理解
     const effectFn = ()=> {
+        
         cleanup(effectFn)
+        // console.log('3')
         // 新建一个函数effectFn，并初始化属性deps，用来存储所有包含当前副作用函数的依赖的集合
         activeEffect = effectFn
         effectStack.push(effectFn)
         fn()
         effectStack.pop()
         activeEffect = effectStack[effectStack.length - 1]
-
-        // console.log(activeEffect.deps)
-         // 需不需要这一句呢？
-        // 好像可以不用清空？有依赖，则一定能刷新 activeEffect 函数，没有依赖，则不会触发get函数
-        activeEffect = ''
     }
     // 为啥先清空啊，那cleanup的时候不都为空的？
+    // 只在初次执行时触发，之后触发的是 effectFn。1 2 3 2 3 2 3.。。
     effectFn.deps = []
+    // console.log('1')
     effectFn()
 }
 
@@ -274,7 +274,13 @@ function trigger(obj, property) {
         const depsSet = depsMap.get(property)
 
         // 因为fn执行的时候会把自己从依赖函数列表中删除，并且因为依赖调用而被重新添加到新的有依赖的集合中
-        const effectsToRun = new Set(depsSet)
+        const effectsToRun = new Set()
+        depsSet && depsSet.forEach((fn) => {
+            // 防止当前执行 set 的与执行 get 的是同一个函数，会导致死循环
+            if(fn !== activeEffect) {
+                effectsToRun.add(fn)
+            }
+        })
         effectsToRun && effectsToRun.forEach(fn => fn()) // 执行其中的函数
     }
 }
