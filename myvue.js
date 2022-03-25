@@ -232,7 +232,10 @@ function effect(fn) {
         cleanup(effectFn)
         // 新建一个函数effectFn，并初始化属性deps，用来存储所有包含当前副作用函数的依赖的集合
         activeEffect = effectFn
+        effectStack.push(effectFn)
         fn()
+        effectStack.pop()
+        activeEffect = effectStack[effectStack.length - 1]
 
         // console.log(activeEffect.deps)
          // 需不需要这一句呢？
@@ -280,6 +283,7 @@ let data = undefined
 let methods = undefined
 const bucket = new Map() // 用于存放依赖的对象
 const domTargetMap = new Map()
+const effectStack = []
 
 function myVue(options) {
     // 转成全局变量只是为了便于获取，减少代码量
