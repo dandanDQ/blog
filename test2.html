@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Vue 模板编译</title>
+    <script src="./myvue.js"></script>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script>
+        const vm = new myVue({
+            data() {
+                return {
+                    num1: 1,
+                    num2: 2,
+                }
+            },
+            template: `<div class="container" style="margin: 10px;">
+          <div class="btns">
+            <span>num1: {{num1}}</span>
+            <button @click="addNum1">add</button>
+            <button @click="reduceNum1">reduce</button>
+          </div>
+          <div class="btns">
+            <span>num2: {{num2}}</span>
+            <button @click="addNum2">add</button>
+            <button @click="reduceNum2">reduce</button>
+          </div>
+          <div>num1 x num2 = {{num1*num2}}</div>
+          <div>num1 + num2 = {{num1+num2}}</div>
+        </div>`,
+            el: '#app',
+            methods: {
+                addNum1() {
+                    this.num1 += 1
+                },
+                reduceNum1() {
+                    this.num1 -= 1
+                },
+                addNum2() {
+                    this.num2 += 1
+                },
+                reduceNum2() {
+                    this.num2 -= 1
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

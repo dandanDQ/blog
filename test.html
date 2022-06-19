@@ -8,37 +8,36 @@
     <title>Vue 模板编译</title>
     <script type="text/x-template" id="template">
         <div class="container" style="margin: 10px;">
-          <div class="clock">
-            <div class="date">
-              {{config.date.year}}/{{config.date.month}}/{{config.date.date}}
+            <div class="clock">
+                <div class="date">
+                    {{config.date.year}}/{{config.date.month}}/{{config.date.date}}
+                </div>
+                <div class="time">
+                    {{config.time.hour}}:{{config.time.minute}}:{{config.time.second}}
+                </div>
+
             </div>
-            <div class="time">
-              {{config.time.hour}}:{{config.time.minute}}:{{config.time.second}}
-            </div>
-           
-          </div>         
-          <div> {{config.time.second % 10 === 0 ? text : '非特殊时间'}} </div> 
+            <div> {{config.time.second % 10 === 0 ? text : '非特殊时间'}} </div>
         </div>
     </script>
 
     <script type="text/x-template" id="clock">
-      <div class="container" style="margin: 10px;">
-        <div class="clock">
-          <div class="date">
-            {{config.date.year}}/{{config.date.month}}/{{config.date.date}}
-          </div>
-          <div class="time">
-            {{config.time.hour}}:{{config.time.minute}}:{{config.time.second}}
-          </div>
-         
-        </div>         
-        <div> {{config.time.second % 10 === 0 ? text : '非特殊时间'}} </div> 
-      </div>
-  </script>
-    
-    
-    <script src="./myvue.js">
+        <div class="container" style="margin: 10px;">
+            <div class="clock">
+                <div class="date">
+                    {{config.date.year}}/{{config.date.month}}/{{config.date.date}}
+                </div>
+                <div class="time">
+                    {{config.time.hour}}:{{config.time.minute}}:{{config.time.second}}
+                </div>
+
+            </div>
+            <div> {{config.time.second % 10 === 0 ? text : '非特殊时间'}} </div>
+        </div>
     </script>
+
+
+    <script src="./myvue.js"></script>
 </head>
 
 <body>
@@ -58,16 +57,16 @@
                 text: '',
                 // 时钟模板
                 config: {
-                  date: {
-                    year: '-',
-                    month: '-',
-                    date: '-'
-                  },
-                  time: {
-                    hour: '-',
-                    minute: '-',
-                    second: '-'
-                  }
+                    date: {
+                        year: '-',
+                        month: '-',
+                        date: '-'
+                    },
+                    time: {
+                        hour: '-',
+                        minute: '-',
+                        second: '-'
+                    }
                 }
             }
         },
@@ -91,8 +90,8 @@
             },
         },
         mounted() {
-          const updateTime = () => {
-              const date = new Date();
+            const updateTime = () => {
+                const date = new Date();
                 this.config.date.year = date.getFullYear()
                 this.config.date.month = date.getMonth() + 1
                 this.config.date.date = date.getDate()
@@ -101,27 +100,27 @@
                 this.config.time.minute = date.getMinutes()
                 this.config.time.second = date.getSeconds().toString().padStart(2, '0')
                 this.text = '整秒报时 ' + date
-              }
-              updateTime()
-              setInterval(updateTime, 1000)
+            }
+            updateTime()
+            setInterval(updateTime, 1000)
         }
 
     })
 </script>
 <style>
-.clock {
-  height: 120px;
-  background-color: rgb(38, 125, 206);
-  padding: 20px;
-  margin: 40px 10px;
-  border-radius: 6px;
-  display: flex;
-  font-size: 100px;
-  align-items: center;
-  justify-content: space-around;
-  font-weight: 600;
-  color:rgb(255, 255, 255)
-}
+    .clock {
+        height: 120px;
+        background-color: rgb(38, 125, 206);
+        padding: 20px;
+        margin: 40px 10px;
+        border-radius: 6px;
+        display: flex;
+        font-size: 100px;
+        align-items: center;
+        justify-content: space-around;
+        font-weight: 600;
+        color: rgb(255, 255, 255)
+    }
 </style>
 
 </html>
