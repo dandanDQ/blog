@@ -218,7 +218,6 @@ function reactiveData(rawData) {
 let activeEffect = '' // 感觉是个闭包
 
 function cleanup(effectFn) {
-    // console.log('2')
     for(const deps of effectFn.deps) {
         // 将自己移除
         deps.delete(effectFn)
@@ -228,11 +227,8 @@ function cleanup(effectFn) {
 }
 
 function effect(fn) {
-    // 不理解
     const effectFn = ()=> {
-        
         cleanup(effectFn)
-        // console.log('3')
         // 新建一个函数effectFn，并初始化属性deps，用来存储所有包含当前副作用函数的依赖的集合
         activeEffect = effectFn
         effectStack.push(effectFn)
@@ -240,10 +236,7 @@ function effect(fn) {
         effectStack.pop()
         activeEffect = effectStack[effectStack.length - 1]
     }
-    // 为啥先清空啊，那cleanup的时候不都为空的？
-    // 只在初次执行时触发，之后触发的是 effectFn。1 2 3 2 3 2 3.。。
     effectFn.deps = []
-    // console.log('1')
     effectFn()
 }
 
@@ -287,7 +280,7 @@ function trigger(obj, property) {
 
 let data = undefined
 let methods = undefined
-const bucket = new Map() // 用于存放依赖的对象
+const bucket = new WeakMap() // 用于存放依赖的对象
 const domTargetMap = new Map()
 const effectStack = []
 
