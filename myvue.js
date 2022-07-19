@@ -226,18 +226,23 @@ function cleanup(effectFn) {
     effectFn.deps.length = 0
 }
 
-function effect(fn) {
+function effect(fn, options = {}) {
     const effectFn = ()=> {
         cleanup(effectFn)
         // 新建一个函数effectFn，并初始化属性deps，用来存储所有包含当前副作用函数的依赖的集合
         activeEffect = effectFn
         effectStack.push(effectFn)
-        fn()
+        const res = fn.call(data)
         effectStack.pop()
         activeEffect = effectStack[effectStack.length - 1]
+        return res
     }
     effectFn.deps = []
-    effectFn()
+    effectFn.options = options
+    if(!options.lazy) {
+        effectFn()
+    }
+    return effectFn
 }
 
 function track(obj, property) {
@@ -274,8 +279,38 @@ function trigger(obj, property) {
                 effectsToRun.add(fn)
             }
         })
-        effectsToRun && effectsToRun.forEach(fn => fn()) // 执行其中的函数
+        effectsToRun && effectsToRun.forEach(fn => {
+            // 如果有调度器
+            if(fn.options.scheduler) {
+                fn.options.scheduler(fn)
+            } else {
+                fn()
+            }
+        }) // 执行其中的函数
     }
+}
+
+function computed(getter) {
+    let value;
+    let dirty = true
+    const effectFn = effect(getter, {
+        lazy: true,
+        scheduler() {
+            dirty = true
+            // 为什么可以再定义前引用?
+            trigger(obj, 'value')
+        }
+    })
+    const obj = {
+        get value() {
+            if(dirty) {
+                value = effectFn()
+            }
+            track(obj, 'value')
+            return value
+        }
+    }
+    return obj
 }
 
 let data = undefined
@@ -289,11 +324,22 @@ function myVue(options) {
     data = reactiveData(options.data())
     methods = options.methods
     this.data = data
-        // 获取模板，编译为虚拟 dom
+
+    // 处理计算属性
+    let computedData = options.computed
+    if(computedData) {
+        const fnKeys = Object.keys(computedData)
+        for(const key of fnKeys) {
+            data[key] = computed(computedData[key])
+        }
+
+    }
+
+    // 获取模板，编译为虚拟 dom
     const tmpl = options.template[0] === '#' ? document.querySelector(options.template).innerHTML : options.template
-        // 把html字符串转化虚拟dom
+    // 把html字符串转化虚拟dom
     const vnode = genVnode(tmpl)
-        // 使用虚拟dom创建真实dom树
+    // 使用虚拟dom创建真实dom树
     const fragment = document.createDocumentFragment() // fragment用来接收所有的结果，之后统一挂载到应用根节点上
     const realDom = createRealDom(vnode)
     fragment.appendChild(realDom)

@@ -32,6 +32,7 @@
           </div>
           <div>num1 x num2 = {{num1*num2}}</div>
           <div>num1 + num2 = {{num1+num2}}</div>
+          <div>{{text}}</div>
         </div>`,
             el: '#app',
             methods: {
@@ -46,6 +47,11 @@
                 },
                 reduceNum2() {
                     this.num2 -= 1
+                }
+            },
+            computed: {
+                text() {
+                    return `${this.num1},${this.num2}`
                 }
             }
         })
