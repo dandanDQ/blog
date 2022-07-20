@@ -297,7 +297,7 @@ function computed(getter) {
         lazy: true,
         scheduler() {
             dirty = true
-            // 为什么可以再定义前引用?
+            // 为什么可以在定义前引用?
             trigger(obj, 'value')
         }
     })
@@ -311,6 +311,39 @@ function computed(getter) {
         }
     }
     return obj
+}
+
+function traverse(source, seen = new Set()) {
+    if(getType(source) !== 'Object' || source === null || seen.has(source)) return
+    for(const key in source) {
+        seen.add(source[key])
+        traverse(source[key], seen)
+        console.log(source, key)
+    }
+}
+
+function watch(source, cb) {
+    let oldVal, newVal
+    let getter
+
+    // 使得每个字段都被访问
+    if(getType(source) === 'Function') {
+        getter = source
+    } else {
+        getter = () => traverse(source)
+    }
+    const effectFn = effect(() => {
+        return getter()
+    },{
+        lazy: true,
+        scheduler() {
+            newVal = effectFn()
+            cb(oldVal, newVal)
+            oldVal = newVal
+        }
+    })
+
+    oldVal = effectFn()
 }
 
 let data = undefined
@@ -333,6 +366,17 @@ function myVue(options) {
             data[key] = computed(computedData[key])
         }
 
+    }
+    // 处理 watch 属性
+    let watchData = options.watch
+    if(watchData) {
+        const fnKeys = Object.keys(watchData)
+        for(const key of fnKeys) {
+            watch(()=> {
+                // 访问对应的属性
+               return data[key]
+            }, watchData[key])
+        }
     }
 
     // 获取模板，编译为虚拟 dom

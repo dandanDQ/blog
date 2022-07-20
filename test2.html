@@ -17,6 +17,7 @@
                 return {
                     num1: 1,
                     num2: 2,
+                    num3: 33
                 }
             },
             template: `<div class="container" style="margin: 10px;">
@@ -32,7 +33,8 @@
           </div>
           <div>num1 x num2 = {{num1*num2}}</div>
           <div>num1 + num2 = {{num1+num2}}</div>
-          <div>{{text}}</div>
+          <div>{{text.value}}</div>
+          <button @click="addNum3">addNum3</button>
         </div>`,
             el: '#app',
             methods: {
@@ -47,11 +49,22 @@
                 },
                 reduceNum2() {
                     this.num2 -= 1
-                }
+                },
+                addNum3() {
+                    this.num3 += 100
+                },
             },
             computed: {
                 text() {
-                    return `${this.num1},${this.num2}`
+                    return `${this.num3}`
+                }
+            },
+            watch: {
+                num3(oldVal, newVal) {
+                    alert(`num3发生变化:${oldVal}-${newVal}`)
+                },
+                num2(oldVal, newVal) {
+                    alert(`num2发生变化:${oldVal}-${newVal}`)
                 }
             }
         })
