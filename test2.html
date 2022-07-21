@@ -17,7 +17,8 @@
                 return {
                     num1: 1,
                     num2: 2,
-                    num3: 33
+                    num3: 3,
+                    num4: 2222
                 }
             },
             template: `<div class="container" style="margin: 10px;">
@@ -35,6 +36,7 @@
           <div>num1 + num2 = {{num1+num2}}</div>
           <div>{{text.value}}</div>
           <button @click="addNum3">addNum3</button>
+          <button @click="reduceNum3">reduceNum3</button>
         </div>`,
             el: '#app',
             methods: {
@@ -53,6 +55,9 @@
                 addNum3() {
                     this.num3 += 100
                 },
+                reduceNum3() {
+                    this.num3 -= 1
+                }
             },
             computed: {
                 text() {
@@ -60,8 +65,23 @@
                 }
             },
             watch: {
-                num3(oldVal, newVal) {
-                    alert(`num3发生变化:${oldVal}-${newVal}`)
+                async num3(oldVal, newVal, onInvalidate) {
+                    let expired = false
+                    onInvalidate(() => {
+                        expired = true
+                    })
+                    let time = (Math.random() > 0.5) ? 3000 : 5000
+                    const p = new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve()
+                        }, time)
+                    })
+                    await p
+                    if (!expired) {
+                        console.log(`未过期:${oldVal}-${newVal}`, time)
+                    } else {
+                        console.log('过期了', time)
+                    }
                 },
                 num2(oldVal, newVal) {
                     alert(`num2发生变化:${oldVal}-${newVal}`)

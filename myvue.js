@@ -325,6 +325,11 @@ function traverse(source, seen = new Set()) {
 function watch(source, cb) {
     let oldVal, newVal
     let getter
+    let cleanup
+
+    const onInvalidate = (fn)=> {
+        cleanup = fn
+    }
 
     // 使得每个字段都被访问
     if(getType(source) === 'Function') {
@@ -338,7 +343,10 @@ function watch(source, cb) {
         lazy: true,
         scheduler() {
             newVal = effectFn()
-            cb(oldVal, newVal)
+            if(cleanup) {
+                cleanup()
+            }
+            cb(oldVal, newVal, onInvalidate)
             oldVal = newVal
         }
     })
