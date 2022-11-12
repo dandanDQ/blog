@@ -5,6 +5,15 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <style>
+    .view {
+      border: 2px solid rgb(51, 156, 205);
+      border-radius: 6px;
+      height: 100px;
+      width: 200px;
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
   <h1>实现一个前端路由</h1>  
@@ -14,15 +23,15 @@
     <button>page1</button>
     <button>page2</button>
   </div>
-  <div id="hash-view"></div>
+  <div id="hash-view" class="view"></div>
 
   <h2>history模式</h2>
   <div id="history-btn">
     <button>history-page1</button>
     <button>history-page2</button>
   </div>
-  <button onclick="history.go(-1)">go(-1)</button>
-  <div id="history-view"></div>
+  <div id="history-view" class="view"></div>
+
   <script>
     function loadPage(page, viewId) {
       const view = document.querySelector(`#${viewId}`)
