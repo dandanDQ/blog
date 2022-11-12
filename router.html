@@ -20,8 +20,8 @@
 
   <h2>hash 模式</h2>
   <div id="hash-btn">
-    <button>page1</button>
-    <button>page2</button>
+    <button>hash-page1</button>
+    <button>hash-page2</button>
   </div>
   <div id="hash-view" class="view"></div>
 
@@ -52,7 +52,7 @@
       loadPage(location.hash, 'hash-view')
       window.onhashchange = function() {
         // 挂载对应的组件
-        const page = location.hash
+        const page = location.hash.substring(1)
         loadPage(page, 'hash-view')
       }
     }
