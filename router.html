@@ -9,7 +9,7 @@
 <body>
   <h1>实现一个前端路由</h1>  
 
-  <h2>哈希方式</h2>
+  <h2>hash 模式</h2>
   <div id="hash-btn">
     <button>page1</button>
     <button>page2</button>
@@ -21,6 +21,7 @@
     <button>history-page1</button>
     <button>history-page2</button>
   </div>
+  <button onclick="history.go(-1)">go(-1)</button>
   <div id="history-view"></div>
   <script>
     function loadPage(page, viewId) {
@@ -54,7 +55,7 @@
       // 劫持原方法并做发射事件处理
       const wrappedFn = function (eventName, ) {
         const originFn = window.history[eventName]
-        const event = new Event(eventName)
+        const event = new Event('popstate')
         return function(...args) {
           const ret = originFn.apply(this, args)
           event.state = args[0]
@@ -64,6 +65,7 @@
       }
 
       window.history.pushState = wrappedFn('pushState')
+      window.history.replaceState = wrappedFn('replaceState')
 
       // 为每个按钮添加事件监听
       const buttons = Array.from(document.querySelector('#history-btn').childNodes).filter(node => node.nodeName === 'BUTTON')
@@ -72,10 +74,6 @@
           // 修改路由状态
           window.history.pushState({state: button.innerText}, `${button.innerText}页面` ,`${button.innerText}.html`)
         })
-      })
-      
-      window.addEventListener('pushState', (e) => {
-        loadPage(e.state?.state, 'history-view')
       })
 
       window.addEventListener('popstate', (e) => {
