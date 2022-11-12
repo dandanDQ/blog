@@ -16,11 +16,21 @@
   </div>
   <div id="hash-view"></div>
 
+  <h2>history模式</h2>
+  <div id="history-btn">
+    <button>history-page1</button>
+    <button>history-page2</button>
+  </div>
+  <div id="history-view"></div>
   <script>
+    function loadPage(page, viewId) {
+      const view = document.querySelector(`#${viewId}`)
+      view.innerHTML = page
+    }
+
     function initHash() {
       // 为每个按钮添加事件监听
       const buttons = Array.from(document.querySelector('#hash-btn').childNodes).filter(node => node.nodeName === 'BUTTON')
-      console.log(buttons)
 
       buttons.forEach(button => {
         button.addEventListener('click', () => {
@@ -29,21 +39,47 @@
         })
       })
 
-      // 监听哈希值变化
-      function loadPage(page) {
-        const view = document.querySelector('#hash-view')
-        view.innerHTML = page
-      }
-
-      loadPage(location.hash)
+      loadPage(location.hash, 'hash-view')
       window.onhashchange = function() {
         // 挂载对应的组件
         const page = location.hash
-        loadPage(page)
+        loadPage(page, 'hash-view')
       }
     }
     // 哈希模式
     initHash()
+    
+    // 历史模式
+    function initHistory() {
+      // 劫持原方法并做发射事件处理
+      const wrappedFn = function (eventName, ) {
+        const originFn = window.history[eventName]
+        const event = new Event(eventName)
+        return function(...args) {
+          const ret = originFn.apply(this, args)
+          event.arguments = args
+          window.dispatchEvent(event)
+          return ret
+        }
+      }
+
+      window.history.pushState = wrappedFn('pushState')
+
+      // 为每个按钮添加事件监听
+      const buttons = Array.from(document.querySelector('#history-btn').childNodes).filter(node => node.nodeName === 'BUTTON')
+      buttons.forEach(button => {
+        button.addEventListener('click', () => {
+          // 修改路由状态
+          window.history.pushState({state: button.innerText}, `${button.innerText}页面` ,`${button.innerText}.html`)
+        })
+      })
+      
+      window.addEventListener('pushState', (e) => {
+        loadPage(e.arguments?.[0]?.state, 'history-view')
+      })
+    }
+
+    initHistory()
 
   </script>
 </body>
