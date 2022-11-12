@@ -57,7 +57,7 @@
         const event = new Event(eventName)
         return function(...args) {
           const ret = originFn.apply(this, args)
-          event.arguments = args
+          event.state = args[0]
           window.dispatchEvent(event)
           return ret
         }
@@ -75,8 +75,15 @@
       })
       
       window.addEventListener('pushState', (e) => {
-        loadPage(e.arguments?.[0]?.state, 'history-view')
+        loadPage(e.state?.state, 'history-view')
       })
+
+      window.addEventListener('popstate', (e) => {
+        loadPage(e.state?.state, 'history-view')
+      })
+
+      // 初始化状态
+      window.history.replaceState({state: 'router'}, '', 'router.html')
     }
 
     initHistory()
