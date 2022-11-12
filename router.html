@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>实现一个前端路由</h1>  
+
+  <h2>哈希方式</h2>
+  <div id="hash-btn">
+    <button>page1</button>
+    <button>page2</button>
+  </div>
+  <div id="hash-view"></div>
+
+  <script>
+    function initHash() {
+      // 为每个按钮添加事件监听
+      const buttons = Array.from(document.querySelector('#hash-btn').childNodes).filter(node => node.nodeName === 'BUTTON')
+      console.log(buttons)
+
+      buttons.forEach(button => {
+        button.addEventListener('click', () => {
+          // 修改哈希值
+          location.hash = button.innerText
+        })
+      })
+
+      // 监听哈希值变化
+      function loadPage(page) {
+        const view = document.querySelector('#hash-view')
+        view.innerHTML = page
+      }
+
+      loadPage(location.hash)
+      window.onhashchange = function() {
+        // 挂载对应的组件
+        const page = location.hash
+        loadPage(page)
+      }
+    }
+    // 哈希模式
+    initHash()
+
+  </script>
+</body>
+</html>
