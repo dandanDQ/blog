@@ -26,14 +26,15 @@
     } */
     .actual-list {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       grid-gap: 10px;;
     }
     .item {
       background-color: rgb(255, 213, 73);
       border-radius: 10px;
-      height: 300px;
+      height: 100px;
       width: 100%;
+      grid-row-start: auto;
     }
     #bottom {
       height: 10px;
@@ -65,15 +66,26 @@
       }, 0)
     }
 
+    function getHeight() {
+      // 100, 200, 300
+      const max = 4
+      const min = 1
+      return (Math.floor(Math.random() * (max - min)) + min) 
+    }
     function addItems() {
       const fragment = document.createDocumentFragment()
-      const total = 3 // 要求是列数的整数倍
+      const total = 6 // 要求是列数的整数倍
 
       for(let i = 0; i < total; i += 1) {
         const el = document.createElement('div')
         id += 1
         el.innerHTML = `${id}`
         el.classList.add('item')
+        // 随机高度
+        const height = getHeight()
+        el.style.height = `${height * 100}px`
+        el.style['grid-row'] = `auto / span ${height}`
+
         fragment.appendChild(el)
       }
       listEl.appendChild(fragment)
@@ -94,8 +106,6 @@
       })
 
       observer.observe(bottom)
-
-
   </script>
 </body>
 </html>
