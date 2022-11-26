@@ -5,8 +5,97 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>长列表优化</title>
+  <style>
+    .container {
+      height: 600px;
+      width: 600px;
+      border-radius: 6px;
+      border: 2px black solid;
+      padding: 10px;
+      overflow: scroll;
+      position: relative;
+    }
+    /* .virtual-content {
+      height: 3000px;
+      background: rgb(53, 177, 255);
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 10px;
+      z-index: -1;
+    } */
+    .actual-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 10px;;
+    }
+    .item {
+      background-color: rgb(255, 213, 73);
+      border-radius: 10px;
+      height: 300px;
+      width: 100%;
+    }
+    #bottom {
+      height: 10px;
+    }
+  </style>
 </head>
 <body>
-  
+  <div class="container" id="container">
+    <div class="virtual-content">
+    </div>
+    <div class="actual-list" id="list">
+    </div>
+    <div id="bottom"></div>
+  </div>
+
+  <script>
+    const list = []
+
+    const listEl = document.querySelector('#list')
+
+    let id = 0
+
+    function loadMore() {
+      setTimeout(() => {
+        addItems()
+        if(isIntersecting) {
+          loadMore()
+        }
+      }, 0)
+    }
+
+    function addItems() {
+      const fragment = document.createDocumentFragment()
+      const total = 3 // 要求是列数的整数倍
+
+      for(let i = 0; i < total; i += 1) {
+        const el = document.createElement('div')
+        id += 1
+        el.innerHTML = `${id}`
+        el.classList.add('item')
+        fragment.appendChild(el)
+      }
+      listEl.appendChild(fragment)
+    }
+
+    let isIntersecting = true
+
+    // 监听交叉部分
+      const bottom = document.querySelector('#bottom')
+      const root = document.querySelector('#container')
+      const observer = new IntersectionObserver(function callback(entries) {
+        isIntersecting = entries[0]?.isIntersecting
+        if(isIntersecting) {
+          loadMore()
+        }
+      },{
+        root,
+      })
+
+      observer.observe(bottom)
+
+
+  </script>
 </body>
 </html>
