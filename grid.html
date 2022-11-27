@@ -93,7 +93,8 @@
         el.innerHTML = `${JSON.stringify(item, null, 2)}`
         el.classList.add('item')
         el.style.height = `${height * 100}px`
-        el.style['grid-row'] = `${endRow - height} / span ${height}`
+        // grid 是听话的！！
+        el.style['grid-row'] = `${endRow - height + 1} / span ${height}`
         el.style['grid-column'] = `${idx + 1} / span 1`
 
         fragment.appendChild(el)

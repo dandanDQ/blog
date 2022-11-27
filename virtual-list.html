@@ -8,13 +8,12 @@
   <style>
     .container {
       height: 600px;
-      width: 600px;
       border-radius: 6px;
       border: 2px black solid;
       padding: 10px;
       overflow: scroll;
       position: relative;
-      background: rgb(53, 177, 255);
+      background: rgb(158, 218, 255);
     }
     .virtual-content {
       height: 0;
@@ -28,8 +27,6 @@
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       grid-gap: 10px;
-      border: 3px solid blue;
-      /* transform: translateY(300px); */
     }
     .item {
       background-color: rgb(255, 213, 73);
@@ -38,14 +35,23 @@
       width: 100%;
       grid-row-start: auto;
 
+      font-size: 40px;
+      font-weight: bold;
 
       display: flex;
       justify-content: center;
-      align-items: flex-end;
+      align-items: center;
+
+
+      /* white-space: pre-wrap;
+      overflow: auto; */
     }
     #bottom {
-      height: 10px;
-      background: red;
+      height: 20px;
+      display: flex;
+      color: white;
+      font-weight: bold;
+      justify-content: center;
     }
   </style>
 </head>
@@ -53,7 +59,9 @@
   <div class="container" id="container">
     <div class="virtual-content" id="virtual-content">
     </div>
-    <div id="bottom"></div>
+    <div id="bottom">
+      loading
+    </div>
 
     <div class="actual-list" id="actual-list">
     </div>
@@ -79,14 +87,16 @@
       }, 2000)
     }
 
-    function getHeight() {
+    function getRandomHeight() {
       // 100, 200, 300
-      const max = 2
-      const min = 2
+      const max = 1
+      const min = 4
       return (Math.floor(Math.random() * (max - min)) + min) 
     }
 
     const heights = new Array(colCount).fill(0)
+    const rows = new Array(colCount).fill(0)
+
     // 每次创建新元素，需要增加对应列的高度
 
     function addItems() {
@@ -95,9 +105,7 @@
       for(let i = 0; i < total; i += 1) {
         id += 1
         // 随机高度
-        const height = getHeight()
-
-
+        const height = getRandomHeight()
 
         // 注意，这里的高度并不是简单的叠加！
         // 而是会叠加到 第一个最小高度上
@@ -120,15 +128,20 @@
         const startPos = heights[idx]
         heights[idx] += height * 100 + gap
 
+        const rowStart = rows[idx] + 1
+
+        rows[idx] += height
+
         // 储存信息
         list.push({
           id,
-          span: height,
           height, // 元素自身的高度
           startPos,
-          minIdx: idx, // 元素被存放在哪一列
-          endPos: heights[idx] // 元素结尾的坐标
+          endPos: heights[idx], // 元素结尾的坐标
           // 与 grid 布局相关的一些属性：
+          span: height,
+          rowStart,
+          colStart: idx + 1, // 元素被存放在哪一列
         })
 
       }
@@ -178,35 +191,39 @@
 
       function handleScroll() {
         const scrollTop = containerEl.scrollTop
-        const startIdx = Math.floor(binarySearch(scrollTop) / colCount) * colCount
+        // 但是这个开始标签，不一定在第一位
+        const startIdx = binarySearch(scrollTop)
         const endIdx = binarySearch(scrollTop + containerEl.clientHeight)
         render(startIdx, startIdx + colCount * 6)
         // 滚动时，transform 真实列表跟随滚动
         const { endPos, startPos } = list[startIdx]
         let offset = scrollTop - startPos
-        if(offset < 0) offset = 0
         actualListEl.style.transform = `translateY(${scrollTop - offset}px)`
       }
 
 
       // 在 list 元素中，渲染指定 list 范围内的元素
       function render(start, end) {
+        console.log('渲染 startIdx', start)
         actualListEl.innerHTML = '' // 清空子节点
         const fragment = document.createDocumentFragment()
         const startIdx = Math.max(start, 0)
         const endIdx = Math.min(end, list.length - 1)
 
+        const rowStartBase = list[startIdx].rowStart
+
         for(let i = startIdx; i <= endIdx; i += 1) {
-        const el = document.createElement('div')
+          const el = document.createElement('div')
 
-        const {id, height} = list[i]
-        el.innerHTML = `${id}`
-        el.classList.add('item')
-        el.style.height = `${height * 100}px`
-        el.style['grid-row'] = `auto / span ${height}`
+          const {id, height, span, rowStart, colStart} = list[i]
+          el.innerHTML =  `${id}`//`${JSON.stringify(list[i], null, 2)}`
+          el.classList.add('item')
+          el.style.height = `${height * 100}px`
+          el.style['grid-row'] = `${rowStart - rowStartBase + 1} / span ${height}`
+          el.style['grid-column'] = `${colStart} / span 1`
 
-        fragment.appendChild(el)
-      }
+          fragment.appendChild(el)
+        }
         actualListEl.appendChild(fragment)
       }
 
