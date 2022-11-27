@@ -27,7 +27,9 @@
       right: 10px;
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      grid-gap: 10px;;
+      grid-gap: 10px;
+      border: 3px solid blue;
+      /* transform: translateY(300px); */
     }
     .item {
       background-color: rgb(255, 213, 73);
@@ -35,9 +37,15 @@
       height: 100px;
       width: 100%;
       grid-row-start: auto;
+
+
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
     }
     #bottom {
       height: 10px;
+      background: red;
     }
   </style>
 </head>
@@ -47,7 +55,7 @@
     </div>
     <div id="bottom"></div>
 
-    <div class="actual-list" id="list">
+    <div class="actual-list" id="actual-list">
     </div>
   </div>
 
@@ -56,7 +64,9 @@
     const colCount = 6
     const gap = 10
 
-    const listEl = document.querySelector('#list')
+    const actualListEl = document.querySelector('#actual-list')
+    const virtualContentEl = document.querySelector('#virtual-content') 
+    const containerEl = document.querySelector('#container')
 
     let id = 0
 
@@ -66,73 +76,139 @@
         if(isIntersecting) {
           loadMore()
         }
-      }, 0)
+      }, 2000)
     }
 
     function getHeight() {
       // 100, 200, 300
-      const max = 4
-      const min = 1
+      const max = 2
+      const min = 2
       return (Math.floor(Math.random() * (max - min)) + min) 
     }
 
     const heights = new Array(colCount).fill(0)
-    const virtualContentEl = document.querySelector('#virtual-content') 
     // 每次创建新元素，需要增加对应列的高度
 
     function addItems() {
-      const fragment = document.createDocumentFragment()
       const total = colCount * 1 // 要求是列数的整数倍
 
       for(let i = 0; i < total; i += 1) {
-        const el = document.createElement('div')
         id += 1
-        el.innerHTML = `${id}`
-        el.classList.add('item')
         // 随机高度
         const height = getHeight()
-        el.style.height = `${height * 100}px`
-        el.style['grid-row'] = `auto / span ${height}`
+
+
+
+        // 注意，这里的高度并不是简单的叠加！
+        // 而是会叠加到 第一个最小高度上
+        // 但是这个算法，与实际计算结果并不完全一致，不过还比较接近了
+        function findIdx() {
+          let minIdx = 0
+          let min = heights[0]
+          heights.forEach((height, idx) => {
+            if(height < min) {
+              min = height
+              minIdx = idx
+            }
+          })
+          return minIdx
+        }
+
+        const idx = findIdx()
 
         // 更新列高度
-        heights[i] += height * 100 + gap
+        const startPos = heights[idx]
+        heights[idx] += height * 100 + gap
 
         // 储存信息
         list.push({
           id,
-          height
+          span: height,
+          height, // 元素自身的高度
+          startPos,
+          minIdx: idx, // 元素被存放在哪一列
+          endPos: heights[idx] // 元素结尾的坐标
+          // 与 grid 布局相关的一些属性：
         })
 
-
-        fragment.appendChild(el)
       }
       
       // 更新虚拟内容高度
       virtualContentEl.style.height = `${Math.max(...heights)}px`
-      listEl.appendChild(fragment)
+      handleScroll()
+
     }
 
     let isIntersecting = true
 
     // 监听交叉部分
       const bottom = document.querySelector('#bottom')
-      const root = document.querySelector('#container')
       const observer = new IntersectionObserver(function callback(entries) {
         isIntersecting = entries[0]?.isIntersecting
         if(isIntersecting) {
           loadMore()
         }
       },{
-        root,
+        root: containerEl,
       })
 
       observer.observe(bottom)
 
+      // 使用二分法查找可视区域列表的开始序号
+      function binarySearch(pos) {
+        // 找到 list 中第一个 endPos 超过 scrollTop 的元素
+        let left = 0, right = list.length
+        let mid;
+        while(left < right) {
+          mid = Math.floor((right - left) / 2) + left
+          const item = list[mid]
+          if(item.endPos < pos) {
+            left = mid + 1
+          } else {
+            right = mid
+
+          }
+        }
+        return mid
+      }
       // 监听 scroll 事件
-      const container = document.querySelector('#container')
-      container.addEventListener('scroll', (e) => {
-        console.log(e, '滚动', container.scrollTop)
+      containerEl.addEventListener('scroll', (e) => {
+       handleScroll()
       })
+
+      function handleScroll() {
+        const scrollTop = containerEl.scrollTop
+        const startIdx = Math.floor(binarySearch(scrollTop) / colCount) * colCount
+        const endIdx = binarySearch(scrollTop + containerEl.clientHeight)
+        render(startIdx, startIdx + colCount * 6)
+        // 滚动时，transform 真实列表跟随滚动
+        const { endPos, startPos } = list[startIdx]
+        let offset = scrollTop - startPos
+        if(offset < 0) offset = 0
+        actualListEl.style.transform = `translateY(${scrollTop - offset}px)`
+      }
+
+
+      // 在 list 元素中，渲染指定 list 范围内的元素
+      function render(start, end) {
+        actualListEl.innerHTML = '' // 清空子节点
+        const fragment = document.createDocumentFragment()
+        const startIdx = Math.max(start, 0)
+        const endIdx = Math.min(end, list.length - 1)
+
+        for(let i = startIdx; i <= endIdx; i += 1) {
+        const el = document.createElement('div')
+
+        const {id, height} = list[i]
+        el.innerHTML = `${id}`
+        el.classList.add('item')
+        el.style.height = `${height * 100}px`
+        el.style['grid-row'] = `auto / span ${height}`
+
+        fragment.appendChild(el)
+      }
+        actualListEl.appendChild(fragment)
+      }
 
     
   </script>

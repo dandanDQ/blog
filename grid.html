@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>研究 grid 布局</title>
+  <style>
+    .container {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-gap: 10px;
+      /* transform: translateY(300px); */
+    }
+    .item {
+      background-color: rgb(255, 213, 73);
+      border-radius: 10px;
+      height: 100px;
+      width: 100%;
+      grid-row-start: auto;
+
+      white-space: pre-wrap;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="container"></div>
+  <script>
+    const container = document.querySelector('#container')
+    const colCount = 6
+    const gap = 10
+    const heights = new Array(colCount).fill(0)
+    const rows = new Array(colCount).fill(0)
+    const list = []
+
+    let id = 0
+
+    function getHeight() {
+      // 100, 200, 300
+      const max = 4
+      const min = 1
+      return (Math.floor(Math.random() * (max - min)) + min) 
+    }
+
+    function createBox(total = 200) {
+      const fragment = document.createDocumentFragment()
+
+      for(let i = 0; i <= total; i += 1) {
+        const el = document.createElement('div')
+        id += 1
+
+        const height = getHeight()
+
+        // 注意，这里的高度并不是简单的叠加！
+        // 而是会叠加到 第一个最小高度上
+        // 但是这个算法，与实际计算结果并不完全一致，不过还比较接近了
+        function findIdx() {
+          let minIdx = 0
+          let min = heights[0]
+          heights.forEach((height, idx) => {
+            if(height < min) {
+              min = height
+              minIdx = idx
+            }
+          })
+          return minIdx
+        }
+
+        const idx = findIdx()
+
+        // 更新列高度
+        const startPos = heights[idx]
+        heights[idx] += height * 100 + gap
+
+        rows[idx] += height
+
+        // 储存信息
+        const endRow = rows[idx]
+        const item = {
+          id,
+          span: height,
+          endRow,
+          height, // 元素自身的高度
+          startPos,
+          minIdx: idx, // 元素被存放在哪一列
+          endPos: heights[idx] // 元素结尾的坐标
+          // 与 grid 布局相关的一些属性：
+        }
+        list.push(item)
+
+
+        el.innerHTML = `${JSON.stringify(item, null, 2)}`
+        el.classList.add('item')
+        el.style.height = `${height * 100}px`
+        el.style['grid-row'] = `${endRow - height} / span ${height}`
+        el.style['grid-column'] = `${idx + 1} / span 1`
+
+        fragment.appendChild(el)
+      }
+      container.appendChild(fragment)
+    }
+
+    createBox()
+  </script>
+</body>
+</html>
