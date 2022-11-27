@@ -14,17 +14,17 @@
       padding: 10px;
       overflow: scroll;
       position: relative;
-    }
-    /* .virtual-content {
-      height: 3000px;
       background: rgb(53, 177, 255);
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 10px;
-      z-index: -1;
-    } */
+    }
+    .virtual-content {
+      height: 0;
+      border: 2px dashed white;
+    } 
     .actual-list {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       grid-gap: 10px;;
@@ -43,15 +43,18 @@
 </head>
 <body>
   <div class="container" id="container">
-    <div class="virtual-content">
-    </div>
-    <div class="actual-list" id="list">
+    <div class="virtual-content" id="virtual-content">
     </div>
     <div id="bottom"></div>
+
+    <div class="actual-list" id="list">
+    </div>
   </div>
 
   <script>
     const list = []
+    const colCount = 6
+    const gap = 10
 
     const listEl = document.querySelector('#list')
 
@@ -72,9 +75,14 @@
       const min = 1
       return (Math.floor(Math.random() * (max - min)) + min) 
     }
+
+    const heights = new Array(colCount).fill(0)
+    const virtualContentEl = document.querySelector('#virtual-content') 
+    // 每次创建新元素，需要增加对应列的高度
+
     function addItems() {
       const fragment = document.createDocumentFragment()
-      const total = 6 // 要求是列数的整数倍
+      const total = colCount * 1 // 要求是列数的整数倍
 
       for(let i = 0; i < total; i += 1) {
         const el = document.createElement('div')
@@ -86,8 +94,21 @@
         el.style.height = `${height * 100}px`
         el.style['grid-row'] = `auto / span ${height}`
 
+        // 更新列高度
+        heights[i] += height * 100 + gap
+
+        // 储存信息
+        list.push({
+          id,
+          height
+        })
+
+
         fragment.appendChild(el)
       }
+      
+      // 更新虚拟内容高度
+      virtualContentEl.style.height = `${Math.max(...heights)}px`
       listEl.appendChild(fragment)
     }
 
@@ -106,6 +127,14 @@
       })
 
       observer.observe(bottom)
+
+      // 监听 scroll 事件
+      const container = document.querySelector('#container')
+      container.addEventListener('scroll', (e) => {
+        console.log(e, '滚动', container.scrollTop)
+      })
+
+    
   </script>
 </body>
 </html>
