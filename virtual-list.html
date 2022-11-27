@@ -71,12 +71,14 @@
     const list = []
     const colCount = 6
     const gap = 10
+    let id = 0
 
     const actualListEl = document.querySelector('#actual-list')
     const virtualContentEl = document.querySelector('#virtual-content') 
     const containerEl = document.querySelector('#container')
 
-    let id = 0
+    const heights = new Array(colCount).fill(0)
+    const rows = new Array(colCount).fill(0)
 
     function loadMore() {
       setTimeout(() => {
@@ -93,11 +95,6 @@
       const min = 4
       return (Math.floor(Math.random() * (max - min)) + min) 
     }
-
-    const heights = new Array(colCount).fill(0)
-    const rows = new Array(colCount).fill(0)
-
-    // 每次创建新元素，需要增加对应列的高度
 
     function addItems() {
       const total = colCount * 1 // 要求是列数的整数倍
