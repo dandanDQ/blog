@@ -25,7 +25,7 @@
       left: 10px;
       right: 10px;
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       grid-gap: 10px;
     }
     .item {
@@ -69,7 +69,7 @@
 
   <script>
     const list = []
-    const colCount = 6
+    const colCount = 2
     const gap = 10
     let id = 0
 
@@ -79,6 +79,7 @@
 
     const heights = new Array(colCount).fill(0)
     const rows = new Array(colCount).fill(0)
+    const buffer = 100 // 顶部增加一些缓冲，防止出现空白
 
     function loadMore() {
       setTimeout(() => {
@@ -86,7 +87,7 @@
         if(isIntersecting) {
           loadMore()
         }
-      }, 2000)
+      }, 0)
     }
 
     function getRandomHeight() {
@@ -104,7 +105,7 @@
         // 随机高度
         const height = getRandomHeight()
 
-        // 注意，这里的高度并不是简单的叠加！
+        // 注意， 这里的高度并不是简单的叠加！
         // 而是会叠加到 第一个最小高度上
         // 但是这个算法，与实际计算结果并不完全一致，不过还比较接近了
         function findIdx() {
@@ -189,9 +190,9 @@
       function handleScroll() {
         const scrollTop = containerEl.scrollTop
         // 但是这个开始标签，不一定在第一位
-        const startIdx = binarySearch(scrollTop)
+        const startIdx = binarySearch(scrollTop - buffer)
         const endIdx = binarySearch(scrollTop + containerEl.clientHeight)
-        render(startIdx, startIdx + colCount * 6)
+        render(startIdx, startIdx + colCount * 8)
         // 滚动时，transform 真实列表跟随滚动
         const { endPos, startPos } = list[startIdx]
         let offset = scrollTop - startPos
