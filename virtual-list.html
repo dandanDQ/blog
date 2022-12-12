@@ -26,10 +26,13 @@
       right: 10px;
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      grid-gap: 10px;
+      grid-auto-rows: 1px;
+      column-gap: 10px;
+      /* grid-gap: 10px; */
     }
     .item {
       background-color: rgb(255, 213, 73);
+      border: 2px solid white;
       border-radius: 10px;
       height: 100px;
       width: 100%;
@@ -78,7 +81,6 @@
     const containerEl = document.querySelector('#container')
 
     const heights = new Array(colCount).fill(0)
-    const rows = new Array(colCount).fill(0)
     const buffer = 100 // 顶部增加一些缓冲，防止出现空白
 
     function loadMore() {
@@ -92,8 +94,8 @@
 
     function getRandomHeight() {
       // 100, 200, 300
-      const max = 1
-      const min = 4
+      const max = 100
+      const min = 400
       return (Math.floor(Math.random() * (max - min)) + min) 
     }
 
@@ -124,11 +126,7 @@
 
         // 更新列高度
         const startPos = heights[idx]
-        heights[idx] += height * 100 + gap
-
-        const rowStart = rows[idx] + 1
-
-        rows[idx] += height
+        heights[idx] += height  + gap
 
         // 储存信息
         list.push({
@@ -138,7 +136,6 @@
           endPos: heights[idx], // 元素结尾的坐标
           // 与 grid 布局相关的一些属性：
           span: height,
-          rowStart,
           colStart: idx + 1, // 元素被存放在哪一列
         })
 
@@ -208,16 +205,17 @@
         const startIdx = Math.max(start, 0)
         const endIdx = Math.min(end, list.length - 1)
 
-        const rowStartBase = list[startIdx].rowStart
+        const startPosBase = list[startIdx].startPos
 
         for(let i = startIdx; i <= endIdx; i += 1) {
           const el = document.createElement('div')
 
-          const {id, height, span, rowStart, colStart} = list[i]
-          el.innerHTML =  `${id}`//`${JSON.stringify(list[i], null, 2)}`
+          const {id, height, span, startPos, colStart} = list[i]
+          el.innerHTML =  `${id}-${height}px`//`${JSON.stringify(list[i], null, 2)}`
           el.classList.add('item')
-          el.style.height = `${height * 100}px`
-          el.style['grid-row'] = `${rowStart - rowStartBase + 1} / span ${height}`
+          el.style.height =  `${height}px`
+          console.log('属性', `${startPos - startPosBase + 1} / span ${height}`)
+          el.style['grid-row'] = `${startPos - startPosBase + 1} / span ${height}`
           el.style['grid-column'] = `${colStart} / span 1`
 
           fragment.appendChild(el)
