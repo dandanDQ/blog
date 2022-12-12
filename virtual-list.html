@@ -84,7 +84,7 @@
     const hintEl = document.querySelector('#hint')
 
     const heights = new Array(colCount).fill(0)
-    const buffer = 300 // 顶部增加一些缓冲，防止出现空白
+    const buffer = containerEl.clientHeight // 顶部增加一些缓冲，防止出现空白
 
     function loadMore() {
       setTimeout(() => {
