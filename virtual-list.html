@@ -189,18 +189,12 @@
 
       function handleScroll() {
         const scrollTop = containerEl.scrollTop
-        // 但是这个开始标签，不一定在第一位
+
         const startIdx = binarySearch(scrollTop - buffer)
         const endIdx = binarySearch(scrollTop + containerEl.clientHeight + buffer)
 
-        console.log(containerEl.clientHeight, '容器高度')
         render(startIdx, endIdx)
-        // 滚动时，transform 真实列表跟随滚动
-        const { endPos, startPos } = list[startIdx]
-        let offset = scrollTop - startPos
-        actualListEl.style.transform = `translateY(${scrollTop - offset}px)`
       }
-
 
       // 在 list 元素中，渲染指定 list 范围内的元素
       function render(start, end) {
@@ -220,16 +214,19 @@
           el.innerHTML =  `${id}(${height}px)`//`${JSON.stringify(list[i], null, 2)}`
           el.classList.add('item')
           el.style.height =  `${height}px`
-          console.log('属性', `${startPos - startPosBase + 1} / span ${height}`)
+          // 摆放当前元素
           el.style['grid-row'] = `${startPos - startPosBase + 1} / span ${height}`
           el.style['grid-column'] = `${colStart} / span 1`
 
           fragment.appendChild(el)
         }
         actualListEl.appendChild(fragment)
+
+        // transform 真实列表跟随滚动
+        const { startPos } = list[startIdx]
+        actualListEl.style.transform = `translateY(${startPos}px)`
       }
 
-    
   </script>
 </body>
 </html>
