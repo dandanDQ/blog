@@ -84,7 +84,7 @@
     const hintEl = document.querySelector('#hint')
 
     const heights = new Array(colCount).fill(0)
-    const buffer = 100 // 顶部增加一些缓冲，防止出现空白
+    const buffer = 300 // 顶部增加一些缓冲，防止出现空白
 
     function loadMore() {
       setTimeout(() => {
@@ -191,8 +191,10 @@
         const scrollTop = containerEl.scrollTop
         // 但是这个开始标签，不一定在第一位
         const startIdx = binarySearch(scrollTop - buffer)
-        const endIdx = binarySearch(scrollTop + containerEl.clientHeight)
-        render(startIdx, startIdx + colCount * 8)
+        const endIdx = binarySearch(scrollTop + containerEl.clientHeight + buffer)
+
+        console.log(containerEl.clientHeight, '容器高度')
+        render(startIdx, endIdx)
         // 滚动时，transform 真实列表跟随滚动
         const { endPos, startPos } = list[startIdx]
         let offset = scrollTop - startPos
@@ -202,7 +204,7 @@
 
       // 在 list 元素中，渲染指定 list 范围内的元素
       function render(start, end) {
-        hintEl.innerHTML = `渲染范围${start}-${end}`
+        hintEl.innerHTML = `渲染范围${start + 1}-${end + 1}`
   
         actualListEl.innerHTML = '' // 清空子节点
         const fragment = document.createDocumentFragment()
