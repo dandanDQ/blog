@@ -70,6 +70,8 @@
     </div>
   </div>
 
+  <div id="hint"></div>
+
   <script>
     const list = []
     const colCount = 2
@@ -79,6 +81,7 @@
     const actualListEl = document.querySelector('#actual-list')
     const virtualContentEl = document.querySelector('#virtual-content') 
     const containerEl = document.querySelector('#container')
+    const hintEl = document.querySelector('#hint')
 
     const heights = new Array(colCount).fill(0)
     const buffer = 100 // 顶部增加一些缓冲，防止出现空白
@@ -199,7 +202,8 @@
 
       // 在 list 元素中，渲染指定 list 范围内的元素
       function render(start, end) {
-        console.log('渲染 startIdx', start)
+        hintEl.innerHTML = `渲染范围${start}-${end}`
+  
         actualListEl.innerHTML = '' // 清空子节点
         const fragment = document.createDocumentFragment()
         const startIdx = Math.max(start, 0)
@@ -211,7 +215,7 @@
           const el = document.createElement('div')
 
           const {id, height, span, startPos, colStart} = list[i]
-          el.innerHTML =  `${id}-${height}px`//`${JSON.stringify(list[i], null, 2)}`
+          el.innerHTML =  `${id}(${height}px)`//`${JSON.stringify(list[i], null, 2)}`
           el.classList.add('item')
           el.style.height =  `${height}px`
           console.log('属性', `${startPos - startPosBase + 1} / span ${height}`)
