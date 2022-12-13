@@ -31,14 +31,13 @@
       /* grid-gap: 10px; */
     }
     .item {
-      background-color: rgb(255, 213, 73);
-      border: 2px solid white;
+      background-color: rgb(255 225 124);;
       border-radius: 10px;
       height: 100px;
       width: 100%;
       grid-row-start: auto;
 
-      font-size: 40px;
+      font-size: 30px;
       font-weight: bold;
 
       display: flex;
@@ -102,44 +101,40 @@
       return (Math.floor(Math.random() * (max - min)) + min) 
     }
 
+    // 注意， 这里的高度并不是简单的叠加！
+    // 而是会叠加到 第一个最小高度上
+    // 但是这个算法，与实际计算结果并不完全一致，不过还比较接近了
+    function findIdx() {
+      let minIdx = 0
+      let min = heights[0]
+      heights.forEach((height, idx) => {
+        if(height < min) {
+          min = height
+          minIdx = idx
+        }
+      })
+      return minIdx
+    }
+
     function addItems() {
       const total = colCount * 1 // 要求是列数的整数倍
-
       for(let i = 0; i < total; i += 1) {
         id += 1
         // 随机高度
         const height = getRandomHeight()
-
-        // 注意， 这里的高度并不是简单的叠加！
-        // 而是会叠加到 第一个最小高度上
-        // 但是这个算法，与实际计算结果并不完全一致，不过还比较接近了
-        function findIdx() {
-          let minIdx = 0
-          let min = heights[0]
-          heights.forEach((height, idx) => {
-            if(height < min) {
-              min = height
-              minIdx = idx
-            }
-          })
-          return minIdx
-        }
-
         const idx = findIdx()
 
         // 更新列高度
-        const startPos = heights[idx]
+        const startRow = heights[idx]
         heights[idx] += height  + gap
 
         // 储存信息
         list.push({
           id,
           height, // 元素自身的高度
-          startPos,
-          endPos: heights[idx], // 元素结尾的坐标
-          // 与 grid 布局相关的一些属性：
-          span: height,
-          colStart: idx + 1, // 元素被存放在哪一列
+          startRow,
+          endRow: heights[idx], // 元素结尾的坐标
+          startCol: idx + 1, // 元素被存放在哪一列
         })
 
       }
@@ -147,37 +142,35 @@
       // 更新虚拟内容高度
       virtualContentEl.style.height = `${Math.max(...heights)}px`
       handleScroll()
-
     }
 
     let isIntersecting = true
 
     // 监听交叉部分
-      const bottom = document.querySelector('#bottom')
-      const observer = new IntersectionObserver(function callback(entries) {
-        isIntersecting = entries[0]?.isIntersecting
-        if(isIntersecting) {
-          loadMore()
-        }
-      },{
-        root: containerEl,
-      })
+    const bottom = document.querySelector('#bottom')
+    const observer = new IntersectionObserver(function callback(entries) {
+      isIntersecting = entries[0]?.isIntersecting
+      if(isIntersecting) {
+        loadMore()
+      }
+    },{
+      root: containerEl,
+    })
 
-      observer.observe(bottom)
+    observer.observe(bottom)
 
       // 使用二分法查找可视区域列表的开始序号
       function binarySearch(pos) {
-        // 找到 list 中第一个 endPos 超过 scrollTop 的元素
+        // 找到 list 中第一个 endRow 超过 scrollTop 的元素
         let left = 0, right = list.length
         let mid;
         while(left < right) {
           mid = Math.floor((right - left) / 2) + left
-          const item = list[mid]
-          if(item.endPos < pos) {
+          const { endRow } = list[mid]
+          if(endRow < pos) {
             left = mid + 1
           } else {
             right = mid
-
           }
         }
         return mid
@@ -205,26 +198,26 @@
         const startIdx = Math.max(start, 0)
         const endIdx = Math.min(end, list.length - 1)
 
-        const startPosBase = list[startIdx].startPos
+        const startRowBase = list[startIdx].startRow
 
         for(let i = startIdx; i <= endIdx; i += 1) {
           const el = document.createElement('div')
 
-          const {id, height, span, startPos, colStart} = list[i]
+          const {id, height, startRow, startCol} = list[i]
           el.innerHTML =  `${id}(${height}px)`//`${JSON.stringify(list[i], null, 2)}`
           el.classList.add('item')
           el.style.height =  `${height}px`
           // 摆放当前元素
-          el.style['grid-row'] = `${startPos - startPosBase + 1} / span ${height}`
-          el.style['grid-column'] = `${colStart} / span 1`
+          el.style['grid-row'] = `${startRow - startRowBase + 1} / span ${height}`
+          el.style['grid-column'] = `${startCol} / span 1`
 
           fragment.appendChild(el)
         }
         actualListEl.appendChild(fragment)
 
         // transform 真实列表跟随滚动
-        const { startPos } = list[startIdx]
-        actualListEl.style.transform = `translateY(${startPos}px)`
+        const { startRow } = list[startIdx]
+        actualListEl.style.transform = `translateY(${startRow}px)`
       }
 
   </script>
